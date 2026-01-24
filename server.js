@@ -35,29 +35,86 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, '/')));
 
-// File to store pixel data
+const mongoose = require('mongoose');
+
+// File to store pixel data (Fallback)
 const PIXEL_DATA_FILE = path.join(__dirname, 'pixel_data.json');
+
+// MongoDB Schema
+const pixelSchema = new mongoose.Schema({
+    _id: String, // format "x,y"
+    color: String
+}, { _id: false }); // We manually set _id
+
+const Pixel = mongoose.model('Pixel', pixelSchema);
 
 // Load saved pixels or start with empty map
 let pixels = new Map();
-try {
-    const savedData = JSON.parse(fs.readFileSync(PIXEL_DATA_FILE, 'utf8'));
-    pixels = new Map(savedData);
-    console.log('Loaded saved pixel data');
-} catch (err) {
-    console.log('No saved pixel data found, starting fresh');
+let useMongo = false;
+
+// Initialize Data Storage
+async function initStorage() {
+    if (process.env.MONGO_URI) {
+        try {
+            await mongoose.connect(process.env.MONGO_URI);
+            console.log('Connected to MongoDB');
+            useMongo = true;
+
+            const docs = await Pixel.find({});
+            docs.forEach(doc => {
+                pixels.set(doc._id, doc.color);
+            });
+            console.log(`Loaded ${pixels.size} pixels from MongoDB`);
+        } catch (err) {
+            console.error('MongoDB connection error:', err);
+            loadLocalFile();
+        }
+    } else {
+        loadLocalFile();
+    }
+}
+
+function loadLocalFile() {
+    try {
+        if (fs.existsSync(PIXEL_DATA_FILE)) {
+            const savedData = JSON.parse(fs.readFileSync(PIXEL_DATA_FILE, 'utf8'));
+            pixels = new Map(savedData);
+            console.log('Loaded saved pixel data from local file');
+        }
+    } catch (err) {
+        console.log('No saved pixel data found, starting fresh');
+    }
 }
 
 // Store connected users
 const users = new Map();
 let onlineCount = 0;
 
-// Save pixels to file
-function savePixels() {
+// Save pixels helper
+async function updatePixel(key, color) {
+    if (useMongo) {
+        if (color === null) {
+            await Pixel.deleteOne({ _id: key });
+        } else {
+            await Pixel.findOneAndUpdate(
+                { _id: key },
+                { _id: key, color: color },
+                { upsert: true, new: true }
+            );
+        }
+    } else {
+        // Local file fallback (debounced/throttled in real apps, but simple here)
+        savePixelsToFile();
+    }
+}
+
+function savePixelsToFile() {
     const pixelArray = Array.from(pixels.entries());
     fs.writeFileSync(PIXEL_DATA_FILE, JSON.stringify(pixelArray));
-    console.log('Saved pixel data');
 }
+
+// Initialize storage immediately
+initStorage();
 
 io.on('connection', (socket) => {
     console.log('User connected');
@@ -71,12 +128,12 @@ io.on('connection', (socket) => {
         const key = `${data.x},${data.y}`;
         if (data.color === null) {
             pixels.delete(key);
+            updatePixel(key, null);
         } else {
             pixels.set(key, data.color);
+            updatePixel(key, data.color);
         }
         socket.broadcast.emit('pixel', data);
-        // Save after each pixel update
-        savePixels();
     });
 
     socket.on('user join', (username) => {
