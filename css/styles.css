@@ -204,56 +204,132 @@ body {
     opacity: 0.5;
 }
 
-/* CORRECTED PREMIUM LAUNCH BUTTON */
-.btn-primary {
-    height: 70px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: #fff;
-    border: 3px solid #1e40af;
-    border-bottom: 10px solid #1e40af;
-    border-radius: 16px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    transition: all 0.15s ease-out;
-    box-shadow: 0 20px 50px rgba(37, 99, 235, 0.5),
-        inset 0 2px 0 rgba(255, 255, 255, 0.3);
-    /* DARKER SHADOW FOR WHITE THEME */
+/* --- NEW LAUNCH BUTTON STYLE --- */
+.launch-button {
+    --text-color: hsla(210, 50%, 85%, 1);
+    --shadow-color: hsla(210, 40%, 52%, .4);
+    --btn-color: hsl(210, 80%, 42%);
+    --bg-color: #141218;
+
     position: relative;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 20px 40px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--text-color);
+    background-color: var(--btn-color);
+    box-shadow: var(--shadow-color) 2px 2px 22px;
+    border-radius: 4px;
+    z-index: 0;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 10px;
+    text-align: center;
+    /* Ensure main text is centered */
 }
 
-.btn-primary::before {
-    content: '';
+.launch-button:focus {
+    outline-color: transparent;
+    box-shadow: var(--btn-color) 2px 2px 22px;
+}
+
+.launch-button .right::after {
+    content: var(--content);
+    display: block;
     position: absolute;
-    top: 2px;
-    left: 4px;
-    right: 4px;
-    height: 40%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-    border-radius: 8px 8px 0 0;
+    white-space: nowrap;
+    padding: 40px 40px;
     pointer-events: none;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    /* Ensure padding doesn't overflow width */
 }
 
-.btn-primary:hover {
-    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-    border-bottom-width: 12px;
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 25px 60px rgba(37, 99, 235, 0.6),
-        inset 0 2px 0 rgba(255, 255, 255, 0.4);
+.launch-button .right,
+.launch-button .left {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
 }
 
-.btn-primary:active {
-    transform: translateY(6px);
-    border-bottom-width: 2px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+.launch-button .right {
+    left: 66%;
+}
+
+.launch-button .left {
+    right: 66%;
+}
+
+.launch-button .right::after {
+    top: -20px;
+    left: -66%;
+    background-color: var(--bg-color);
+    /* Using dark color for the slice effect */
+    color: transparent;
+    transition: transform .4s ease-out;
+    transform: translate(0, -90%) rotate(0deg)
+}
+
+/* Adjust background color for the slice effect to match the card background if needed, 
+   but the user code uses transparent text on a dark bg for the "cut".
+   Since our card is white/light (#f6f6f6), we should probably use that for the 'hiding' layer 
+   if we want it to look like a cut, OR stick to the dark theme requested if it's a stylistic choice.
+   Let's use the local var --bg-color but set it to the container background for the mask to work properly visually?
+   Actually, the user's effect makes the text look "sliced" by an overlying block.
+   Let's check the user's code: --bg-color is #141218 (dark).
+   If I use dark on a light card, it will look like a black block.
+   I will change --bg-color to match the container (#f6f6f6) so the text appears cut transparently.
+*/
+.launch-button {
+    --bg-color: #f6f6f6;
+    /* Adjusted to match welcome card background */
+}
+
+.launch-button:hover .right::after {
+    transform: translate(0, -47%) rotate(0deg)
+}
+
+.launch-button .right:hover::after {
+    transform: translate(0, -50%) rotate(-7deg)
+}
+
+.launch-button .left:hover~.right::after {
+    transform: translate(0, -50%) rotate(7deg)
+}
+
+/* bubbles */
+.launch-button::before {
+    content: '';
+    pointer-events: none;
+    opacity: .6;
+    background:
+        radial-gradient(circle at 20% 35%, transparent 0, transparent 2px, var(--text-color) 3px, var(--text-color) 4px, transparent 4px),
+        radial-gradient(circle at 75% 44%, transparent 0, transparent 2px, var(--text-color) 3px, var(--text-color) 4px, transparent 4px),
+        radial-gradient(circle at 46% 52%, transparent 0, transparent 4px, var(--text-color) 5px, var(--text-color) 6px, transparent 6px);
+
+    width: 100%;
+    height: 300%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    animation: bubbles 5s linear infinite both;
+}
+
+@keyframes bubbles {
+    from {
+        transform: translate();
+    }
+
+    to {
+        transform: translate(0, -66.666%);
+    }
 }
 
 .community-stats {
@@ -345,13 +421,14 @@ body {
     padding-bottom: 6px;
 }
 
-/* Info Group Top Left */
+/* Info Group Top Right */
 .info-group {
     position: absolute;
     top: 25px;
-    left: 25px;
+    right: 25px;
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 15px;
     z-index: 100;
 }
@@ -426,21 +503,22 @@ body {
     background: var(--glass);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 6px;
-    gap: 6px;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
     z-index: 100;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 .view-controls {
     top: 25px;
-    right: 25px;
-    flex-direction: column;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
 }
 
 .tools-controls {
-    bottom: 25px;
+    top: 25px;
     left: 25px;
     flex-direction: column;
 }
@@ -449,24 +527,24 @@ body {
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
-    padding: 12px 24px;
-    border-radius: 35px;
+    padding: 8px 16px;
+    border-radius: 30px;
     background: var(--glass-heavy);
 }
 
 button,
 .tool-button {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     background: rgba(0, 0, 0, 0.03);
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     color: var(--text-dim);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 14px;
     transition: 0.2s;
 }
 
@@ -498,9 +576,9 @@ button:hover,
 }
 
 .color-button {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
     cursor: pointer;
     border: 1px solid var(--border);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -520,9 +598,9 @@ button:hover,
 }
 
 .picker-container {
-    width: 48px;
-    height: 48px;
-    padding: 4px;
+    width: 34px;
+    height: 34px;
+    padding: 2px;
     background: rgba(0, 0, 0, 0.03);
     border-radius: 50%;
     border: 1px solid var(--border);
@@ -532,8 +610,8 @@ button:hover,
 }
 
 #custom-color {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border: none;
     background: transparent;
     cursor: pointer;
@@ -573,9 +651,9 @@ button:hover,
 }
 
 .mini-map-wrapper {
-    width: 160px;
-    height: 160px;
-    border-radius: 14px;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border);
     background: #f6f6f6;
@@ -599,22 +677,22 @@ button:hover,
 /* --- CHAT --- */
 .chat-container {
     position: fixed;
-    left: 85px;
+    left: 25px;
     bottom: 25px;
     z-index: 1000;
 }
 
 .chat-toggle {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: var(--primary);
     color: #fff;
     border: none;
     cursor: pointer;
     box-shadow: var(--shadow);
     position: relative;
-    font-size: 22px;
+    font-size: 18px;
 }
 
 .unread-count {
@@ -999,48 +1077,108 @@ button:hover,
         font-size: 10px;
     }
 
+    /* Mobile Welcome Screen Enhancements */
     .welcome-container {
         flex-direction: column;
         height: auto;
-        width: 98%;
+        min-height: 90vh;
+        /* maximize height */
+        width: 95%;
+        /* maximize width */
         border-radius: 24px;
-        margin: 10px;
+        margin: 10px auto;
+        overflow-y: auto;
+        /* allow scrolling if content overflows */
     }
 
     .welcome-hero {
-        height: 180px;
-        min-height: 180px;
+        flex: 0 0 200px;
+        /* fixed height for hero image */
+        height: 200px;
+        min-height: 200px;
+        width: 100%;
     }
 
     .welcome-content-card {
-        padding: 30px 25px;
+        padding: 30px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        /* align to top */
+        gap: 20px;
+    }
+
+    .branding {
+        margin-bottom: 20px;
+        text-align: center;
     }
 
     .glitch-text {
-        font-size: 20px;
+        font-size: 28px;
+        /* larger title */
     }
 
     .description {
-        font-size: 8px;
-        margin-bottom: 2rem;
+        font-size: 12px;
+        /* larger text */
+        margin-bottom: 30px;
+        text-align: center;
+        max-width: 100%;
+        line-height: 1.6;
     }
 
-    .btn-primary {
+    .login-form {
+        width: 100%;
+        gap: 20px;
+    }
+
+    .input-wrapper {
+        padding: 5px 20px;
+        /* larger touch area */
         height: 60px;
-        font-size: 12px;
-        letter-spacing: 2px;
+    }
+
+    .input-wrapper i {
+        font-size: 18px;
+    }
+
+    #username-input {
+        font-size: 16px;
+        /* prevent iOS zoom */
+        padding: 15px 0;
+    }
+
+    /* Mobile Launch Button */
+    .launch-button {
+        font-size: 18px;
+        /* slightly smaller font to fit width */
+        padding: 25px 20px;
+        /* larger touch target */
+        margin-top: 10px;
+        white-space: normal;
+        /* allow text wrap if really needed, but usually nowrap is better */
+    }
+
+    .launch-button .right::after {
+        padding: 40px 20px;
+        /* match parent padding */
     }
 
     .community-stats {
-        margin-top: 2rem;
-        flex-direction: column;
-        gap: 15px;
+        margin-top: auto;
+        /* Push to bottom */
+        padding-top: 30px;
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
     }
 
+    /* Hide non-essential UI on mobile welcome to reduce clutter */
     .info-group {
-        top: 10px;
-        left: 10px;
-        gap: 8px;
+        display: none;
+        /* Hide top-left info panel on mobile */
     }
 
     .status-panel,
@@ -1049,47 +1187,79 @@ button:hover,
     }
 
     .floating-controls {
-        padding: 4px;
-        gap: 4px;
-        border-radius: 12px;
+        padding: 3px;
+        gap: 3px;
+        border-radius: 10px;
     }
 
     button,
     .tool-button {
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .view-controls {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        flex-direction: row;
+    }
+
+    .tools-controls {
+        top: 10px;
+        left: 10px;
+        flex-direction: row;
     }
 
     .color-controls {
-        bottom: 15px;
-        padding: 8px 16px;
+        bottom: 10px;
+        padding: 6px 12px;
         max-width: 95%;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .color-palette {
+        gap: 6px;
     }
 
     .color-button {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        border-radius: 12px;
+    }
+
+    .picker-container {
+        width: 30px;
+        height: 30px;
+    }
+
+    #custom-color {
+        width: 22px;
+        height: 22px;
     }
 
     .chat-container {
-        left: 15px;
-        bottom: 15px;
+        left: 10px;
+        bottom: 10px;
     }
 
     .chat-toggle {
-        width: 48px;
-        height: 48px;
-        font-size: 20px;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        border-radius: 10px;
     }
 
     .chat-panel {
-        width: calc(100vw - 30px);
-        max-width: 320px;
-        height: 60vh;
-        max-height: 400px;
+        width: calc(100vw - 20px);
+        max-width: 300px;
+        height: 50vh;
+        max-height: 350px;
+        bottom: 55px;
     }
 
     .mini-map-wrapper {
@@ -1097,7 +1267,102 @@ button:hover,
     }
 
     .stats-group {
-        bottom: 15px;
-        right: 15px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .stats-panel {
+        min-width: 100px;
+        font-size: 8px;
+        padding: 10px;
+    }
+
+    .online-stat,
+    .coord-stat {
+        font-size: 8px;
+    }
+
+    /* Mobile-specific touch improvements */
+    .creative-panel {
+        padding: 10px;
+    }
+}
+
+/* --- SOCIAL CONNECT --- */
+.social-connect {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.social-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    /* Squircle for modern look */
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    color: var(--text-dim);
+    font-size: 22px;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+.social-icon i {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.social-icon:hover {
+    transform: translateY(-6px) scale(1.05);
+    color: #fff;
+    border-color: transparent;
+}
+
+.social-icon:hover i {
+    transform: scale(1.2);
+}
+
+.social-icon.facebook:hover {
+    background: linear-gradient(135deg, #1877F2, #165ec2);
+    box-shadow: 0 10px 25px rgba(24, 119, 242, 0.4);
+}
+
+.social-icon.linkedin:hover {
+    background: linear-gradient(135deg, #0A66C2, #004182);
+    box-shadow: 0 10px 25px rgba(10, 102, 194, 0.4);
+}
+
+.social-icon.whatsapp:hover {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+}
+
+.social-icon.email:hover {
+    background: linear-gradient(135deg, #EA4335, #c5221f);
+    box-shadow: 0 10px 25px rgba(234, 67, 53, 0.4);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .social-connect {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 2rem;
+        gap: 24px;
+    }
+
+    .social-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 24px;
     }
 }
