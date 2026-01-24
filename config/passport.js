@@ -45,6 +45,7 @@ module.exports = function (passport) {
 
     // 3. GOOGLE STRATEGY
     if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+        console.log('✅ Google Strategy Initialized');
         passport.use(new GoogleStrategy({
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -69,5 +70,7 @@ module.exports = function (passport) {
                     return done(err);
                 }
             }));
+    } else {
+        console.log('⚠️  Google Strategy DISABLED: Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in environment');
     }
 };
