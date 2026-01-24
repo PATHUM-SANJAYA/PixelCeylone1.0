@@ -11,7 +11,7 @@ class Chat {
         this.initEmojiPanel();
         this.setupEventListeners();
         this.setupSocketListeners();
-        this.initWelcomeScreen();
+        // Welcome screen handled by auth.js
     }
 
     getUserId() {
@@ -54,30 +54,12 @@ class Chat {
         this.emojiToggle = document.getElementById('emoji-toggle');
         this.emojiPanel = document.getElementById('emoji-panel');
 
-        this.welcomeScreen = document.getElementById('welcome-screen');
-        this.usernameInput = document.getElementById('username-input');
-        this.startButton = document.getElementById('start-button');
-        this.appContainer = document.getElementById('app');
         this.notificationContainer = document.getElementById('notification-container');
     }
 
-    initWelcomeScreen() {
-        if (this.username) this.usernameInput.value = this.username;
-        this.startButton.onclick = () => this.handleStart();
-        this.usernameInput.onkeypress = (e) => { if (e.key === 'Enter') this.handleStart(); };
-    }
-
-    handleStart() {
-        const name = this.usernameInput.value.trim() || `User_${this.userId}`;
+    setUsername(name) {
         this.username = name;
         this.setCookie('pixelUsername', name, 365);
-        this.welcomeScreen.classList.add('hide');
-        setTimeout(() => {
-            this.welcomeScreen.style.display = 'none';
-            this.appContainer.style.display = 'flex';
-            if (window.pixelCanvas) window.pixelCanvas.setupCanvas();
-        }, 800);
-        this.socket.emit('user join', name);
     }
 
     initEmojiPanel() {

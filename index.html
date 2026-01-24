@@ -33,22 +33,47 @@
 
                 <p class="description">Join the world's largest collaborative pixel canvas. Every dot matters.</p>
 
-                <div class="login-form">
-                    <div class="input-wrapper">
-                        <i class="fas fa-user-ninja"></i>
-                        <input type="text" id="username-input" placeholder="WONDERFUL USERNAME..." maxlength="15">
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">LOGIN</button>
+                        <button class="auth-tab" data-tab="register">REGISTER</button>
                     </div>
-                    <button id="start-button" class="launch-button" style="--content: 'LAUNCH CANVAS';">
-                        <div class="left"></div>
-                        LAUNCH CANVAS
-                        <div class="right"></div>
-                    </button>
-                </div>
 
-                <div class="community-stats">
-                    <div class="stat"><i class="fas fa-circle live-icon"></i> <span id="welcome-online">...</span>
-                        ONLINE</div>
-                    <div class="stat"><i class="fas fa-layer-group"></i> 1M x 1M WORLD</div>
+                    <!-- Login Form -->
+                    <div id="login-form" class="auth-form active">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="login-username" placeholder="USERNAME">
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="login-password" placeholder="PASSWORD">
+                            <i class="fas fa-eye toggle-password" data-target="login-password"></i>
+                        </div>
+                        <button id="login-btn" class="launch-button">LOGIN</button>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="register-form" class="auth-form">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user-plus"></i>
+                            <input type="text" id="reg-username" placeholder="CHOOSE USERNAME" maxlength="15">
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="reg-password" placeholder="PASSWORD">
+                            <i class="fas fa-eye toggle-password" data-target="reg-password"></i>
+                        </div>
+                        <button id="register-btn" class="launch-button">CREATE ACCOUNT</button>
+                    </div>
+
+                    <div class="divider"><span>OR</span></div>
+
+                    <a href="/auth/google" class="google-btn">
+                        <i class="fab fa-google"></i> CONTINUE WITH GOOGLE
+                    </a>
+
+                    <div id="auth-error" class="error-msg"></div>
                 </div>
 
                 <div class="social-connect">
@@ -68,6 +93,12 @@
                         target="_blank" class="social-icon email" title="Email">
                         <i class="fas fa-envelope"></i>
                     </a>
+                </div>
+
+                <div class="community-stats">
+                    <div class="stat"><i class="fas fa-circle live-icon"></i> <span id="welcome-online">...</span>
+                        ONLINE</div>
+                    <div class="stat"><i class="fas fa-layer-group"></i> 1M x 1M WORLD</div>
                 </div>
             </div>
         </div>
@@ -232,6 +263,7 @@
             if (el) el.textContent = count;
         });
     </script>
+    <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script src="js/chat.js"></script>
 </body>
