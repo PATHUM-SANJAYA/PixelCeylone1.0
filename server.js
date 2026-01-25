@@ -590,6 +590,16 @@ io.on('connection', (socket) => {
     });
 });
 
+// HANDLE UNHANDLED REJECTIONS (Catch MongoDB SSL/IP Errors)
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('--- UNHANDLED GLOBAL ERROR ---');
+    console.error('Reason:', reason);
+    if (reason && reason.toString().includes('MongoServerSelectionError')) {
+        console.error('🚨 SOLUTION: Your Render server IP is not whitelisted in MongoDB Atlas.');
+        console.error('🚨 Go to MongoDB Atlas -> Network Access -> Add IP -> Select "ALLOW ACCESS FROM ANYWHERE" (0.0.0.0/0)');
+    }
+});
+
 http.listen(PORT, HOST, () => {
     console.log(`Server running on http://${HOST}:${PORT}`);
 });

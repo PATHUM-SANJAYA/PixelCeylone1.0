@@ -31,7 +31,11 @@ Render restarts every time you update code. Without MongoDB, your art will be de
 
 1.  Sign up at [MongoDB Atlas](https://www.mongodb.com/).
 2.  **Deploy a Free Cluster** (M0). 
-3.  In **Network Access**, click "Add IP Address" and select **"Allow Access from Anywhere"** (Required for Render).
+3.  **🚨 CRITICAL FIX FOR YOUR ERROR:**
+    *   In the sidebar, click **Network Access**.
+    *   Click **Add IP Address**.
+    *   Select **"ALLOW ACCESS FROM ANYWHERE"** (or type `0.0.0.0/0`).
+    *   *If you don't do this, Render will give you an "SSL internal error" because it doesn't recognize the IP.*
 4.  In **Database Access**, create a user (e.g., `admin`) and set a strong password.
 5.  Click **Connect** -> **Drivers** -> Copy the `Connection String`.
     *   *It looks like: `mongodb+srv://admin:<password>@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority`*
