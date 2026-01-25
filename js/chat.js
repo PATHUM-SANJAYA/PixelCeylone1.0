@@ -115,6 +115,9 @@ class Chat {
             const el = document.getElementById('online-count');
             if (el) el.textContent = count;
         });
+
+        // Proactively request count in case initial connection emission was missed
+        this.socket.emit('get online count');
     }
 
     toggleChat() {
@@ -159,7 +162,41 @@ class Chat {
     addMessage(data, type) {
         const el = document.createElement('div');
         el.className = `chat-message ${type}`;
-        el.innerHTML = `<div class="message-info">${data.username}</div><div class="message-content">${data.message}</div>`;
+
+        // Add profile picture
+        const avatar = document.createElement('img');
+        avatar.className = 'message-avatar';
+        avatar.src = data.profilePicture || '/images/default-avatar.png';
+        avatar.alt = data.username;
+        avatar.onclick = () => {
+            if (window.profileManager && data.username) {
+                window.profileManager.showProfile(data.username);
+            }
+        };
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message-content-wrapper';
+
+        const info = document.createElement('div');
+        info.className = 'message-info';
+        info.textContent = data.username;
+        info.style.cursor = 'pointer';
+        info.onclick = () => {
+            if (window.profileManager && data.username) {
+                window.profileManager.showProfile(data.username);
+            }
+        };
+
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.textContent = data.message;
+
+        wrapper.appendChild(info);
+        wrapper.appendChild(content);
+
+        el.appendChild(avatar);
+        el.appendChild(wrapper);
+
         this.messagesContainer.appendChild(el);
         this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
@@ -179,11 +216,21 @@ class Chat {
         const el = document.createElement('div');
         el.className = `pixel-notification ${action}-notification`;
 
-        // Determine icon and message based on action
-        const isJoin = action === 'joined';
-        const icon = isJoin ? '👋' : '👋';
-        const title = isJoin ? 'New Artist' : 'Artist Left';
-        const message = isJoin ? `${name} joined the canvas` : `${name} left the canvas`;
+        let icon = '👋', title = 'Notification', message = name;
+
+        if (action === 'joined') {
+            icon = '👋';
+            title = 'New Artist';
+            message = `${name} joined the canvas`;
+        } else if (action === 'left') {
+            icon = '🏃';
+            title = 'Artist Left';
+            message = `${name} left the canvas`;
+        } else if (action === 'cooldown') {
+            icon = '⏳';
+            title = 'Cooldown';
+            message = name; // 'Wait X.Xs'
+        }
 
         el.innerHTML = `
             <div class="notification-icon">${icon}</div>

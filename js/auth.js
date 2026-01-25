@@ -81,7 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (data.success) {
-                startGame(data.user);
+                // REDIRECT TO LOGIN AS REQUESTED
+                showError('Registration successful! Now login below.');
+                const loginTab = document.querySelector('.auth-tab[data-tab="login"]');
+                if (loginTab) loginTab.click();
+
+                // Pre-fill login username
+                document.getElementById('login-username').value = username;
+                document.getElementById('login-password').value = '';
             } else {
                 showError(data.message);
             }
@@ -125,65 +132,78 @@ async function checkUserStatus() {
 }
 
 function promptForUsername(user) {
-    // Modify UI to ask for username
-    document.querySelector('.auth-tabs').style.display = 'none';
-    document.getElementById('login-form').classList.remove('active');
-    document.getElementById('register-form').classList.remove('active');
-    document.querySelector('.divider').style.display = 'none';
-    document.querySelector('.google-btn').style.display = 'none';
-
-    // Show a custom username set form (reusing register form structure simpler)
-    const container = document.querySelector('.auth-container');
-    container.innerHTML = `
-        <div style="text-align:center; margin-bottom:15px; font-size:10px;">WELCOME! CHOOSE YOUR PIXEL NAME:</div>
-        <div class="input-wrapper">
-             <i class="fas fa-user-tag"></i>
-             <input type="text" id="final-username" placeholder="USERNAME" maxlength="15">
-        </div>
-        <button id="set-username-btn" class="launch-button" style="margin-top:15px">START</button>
-        <div id="final-error" class="error-msg"></div>
-    `;
-
-    document.getElementById('set-username-btn').addEventListener('click', async () => {
-        const username = document.getElementById('final-username').value;
-        if (!username) return;
-
-        const res = await fetch('/auth/set-username', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username })
-        });
-        const data = await res.json();
-        if (data.success) {
-            startGame(data.user);
-        } else {
-            document.getElementById('final-error').textContent = data.message;
-        }
-    });
+    // For Google users, we now use the main onboarding flow instead of this custom one
+    // But let's call startGame directly, it will handle the missing username.
+    user.username = null; // Ensure it's null so startGame detects it
+    startGame(user);
 }
 
 function startGame(user) {
-    // Save locally for other scripts
-    document.cookie = `pixelUsername=${user.username}; path=/; max-age=31536000`; // 1 year
+    console.log('--- START GAME SEQUENCE ---');
+    console.log('User State:', user ? { u: user.username, b: user.bio } : 'NO USER');
 
-    // Hide welcome screen
-    const welcome = document.getElementById('welcome-screen');
-    welcome.classList.add('hide');
-    setTimeout(() => welcome.style.display = 'none', 1000);
-
-    document.getElementById('app').style.display = 'flex';
-
-    // Connect to socket with username
-    // Note: window.sharedSocket is defined in index.html
-    if (window.sharedSocket) {
-        window.sharedSocket.emit('user join', user.username);
+    if (!user) {
+        console.error('startGame called without user object');
+        return;
     }
+
+    // NEW FLOW: Check if profile is complete
+    const isProfileIncomplete = !user.username || !user.bio || user.username.startsWith('guest_') || user.bio === 'Hello, I am a pixel artist!' || user.bio === 'New Artist';
+
+    if (isProfileIncomplete && !window.onboardingShown) {
+        console.log('Profile INCOMPLETE. Triggering Onboarding UI...');
+
+        // Hide login modal so it doesn't block the view
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) authModal.style.display = 'none';
+
+        const runOnboarding = (retries = 0) => {
+            if (window.showOnboarding) {
+                console.log('Onboarding system ready. Calling show...');
+                window.showOnboarding(user);
+            } else if (retries < 15) {
+                console.warn(`Waiting for ProfileManager (retry ${retries}/15)...`);
+                setTimeout(() => runOnboarding(retries + 1), 200);
+            } else {
+                console.error('CRITICAL ERROR: ProfileManager failed to load.');
+                alert('Connection delay. Please refresh the page to continue.');
+            }
+        };
+
+        runOnboarding();
+        return;
+    }
+
+    console.log('Profile COMPLETE. Entering World...');
+
+    // 1. Hide Landing Page Assets
+    if (window.hideLandingPage) {
+        window.hideLandingPage();
+    } else {
+        const welcome = document.getElementById('welcome-screen');
+        if (welcome) {
+            welcome.classList.add('hide');
+            setTimeout(() => welcome.style.display = 'none', 1000);
+        }
+    }
+
+    // 2. Hide ALL Modals
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+
+    // 3. Show App
+    document.getElementById('app').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // 4. Update Cookies
+    document.cookie = `pixelUsername=${user.username}; path=/; max-age=31536000`;
+
+    // 5. Contextual Init
+    if (window.sharedSocket) window.sharedSocket.emit('user join', user.username);
 
     // Update Chat System
     if (window.chat) {
         window.chat.setUsername(user.username);
     } else {
-        // Retry if chat hasn't loaded yet
         const checkChat = setInterval(() => {
             if (window.chat) {
                 window.chat.setUsername(user.username);
@@ -192,8 +212,6 @@ function startGame(user) {
         }, 100);
     }
 
-    // Initialize specific game logic if it was waiting
-    if (typeof initGame === 'function') {
-        initGame(user.username);
-    }
+    if (typeof initGame === 'function') initGame(user.username);
+    if (window.pixelCanvas) window.pixelCanvas.refresh();
 }

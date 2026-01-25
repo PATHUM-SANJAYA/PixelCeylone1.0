@@ -17,6 +17,30 @@ const userSchema = new mongoose.Schema({
         sparse: true
     },
     displayName: String,
+    profilePicture: {
+        type: String,
+        default: '/images/default-avatar.png'
+    },
+    bio: {
+        type: String,
+        default: 'Hello, I am a pixel artist!'
+    },
+    pixelCount: {
+        type: Number,
+        default: 0
+    },
+    likesCount: {
+        type: Number,
+        default: 0
+    },
+    likedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    onlineStatus: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

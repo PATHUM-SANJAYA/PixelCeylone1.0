@@ -25,11 +25,25 @@ class LocalUser {
         Object.assign(this, data);
         if (!this.id && this._id) this.id = this._id;
         if (!this.id) this.id = Math.random().toString(36).substr(2, 9);
+
+        // Default values for new profile fields
+        if (this.profilePicture === undefined) this.profilePicture = '/images/default-avatar.png';
+        if (this.bio === undefined) this.bio = 'Hello, I am a pixel artist!';
+        if (this.pixelCount === undefined) this.pixelCount = 0;
+        if (this.likesCount === undefined) this.likesCount = 0;
+        if (this.likedBy === undefined) this.likedBy = [];
+        if (this.onlineStatus === undefined) this.onlineStatus = false;
     }
 
     async save() {
         const users = getUsers();
-        const existingIndex = users.findIndex(u => u.id === this.id || u.username === this.username);
+        // Crucial fix: Only match username if it exists!
+        const existingIndex = users.findIndex(u => {
+            if (u.id === this.id) return true;
+            if (this.username && u.username === this.username) return true;
+            return false;
+        });
+
         if (existingIndex >= 0) {
             users[existingIndex] = this;
         } else {

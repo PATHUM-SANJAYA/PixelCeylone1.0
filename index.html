@@ -6,33 +6,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PixelCeylon - Global Collaborative Art</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;800&family=Inter:wght@400;600&display=swap">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/profile-fixes.css">
+    <link rel="stylesheet" href="css/critical-fixes.css">
 </head>
 
 <body>
-    <!-- Advanced Creative Welcome Screen -->
-    <div id="welcome-screen" class="welcome-overlay">
-        <div class="welcome-container">
-            <div class="pixel-art-decor top-left"></div>
-            <div class="pixel-art-decor bottom-right"></div>
+    <!-- Navigation -->
+    <nav id="landing-nav">
+        <div class="logo">
+            <i class="fas fa-th"></i> PIXEL<span>CEYLON</span>
+        </div>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#stats">Live Stats</a>
+            <a href="#footer">Social</a>
+            <a href="javascript:void(0)" class="nav-cta show-auth">PLAY NOW</a>
+        </div>
+    </nav>
 
+    <!-- Welcome/Landing Screen -->
+    <div id="welcome-screen" class="landing-page-root">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-background">
+                <img src="images/hero.png" alt="Collaborative Pixel Art">
+            </div>
+            <div class="hero-content">
+                <div class="badge">SRI LANKA'S LARGEST CANVAS</div>
+                <h1>Create <span class="art-text">Art</span> <span>Together</span> in <span
+                        class="live-text">Real-Time</span></h1>
+                <p>Join a global community of artists building a massive persistent pixel masterpiece celebrating Sri
+                    Lankan heritage and creativity.</p>
+                <div class="hero-btns">
+                    <button class="btn-primary show-auth">START DRAWING <i class="fas fa-chevron-right"></i></button>
+                    <a href="#features" class="btn-secondary">EXPLORE FEATURES</a>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="mouse"></div>
+                <div class="arrow">
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section id="stats" class="stats">
+            <div class="stat-item">
+                <span class="stat-number">1M+</span>
+                <span class="stat-label">PIXELS</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="welcome-online">...</span>
+                <span class="stat-label">ONLINE NOW</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">24/7</span>
+                <span class="stat-label">ALWAYS LIVE</span>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="section">
+            <div class="section-header">
+                <h2>Why Pixel<span>Ceylon?</span></h2>
+                <p>Designed for collaboration, built for community. Experience the most advanced pixel canvas in the
+                    region.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Instant Sync</h3>
+                    <p>Every pixel you place is instantly visible to everyone across the globe. No lag, just pure
+                        creativity.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>Global Chat</h3>
+                    <p>Connect with other artists in real-time. Share techniques, coordinate mega-art projects, and make
+                        friends.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>Creative Tools</h3>
+                    <p>From custom palettes to a powerful color picker. Everything you need to create your next
+                        masterpiece.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Showcase -->
+        <section id="about" class="showcase section">
+            <div class="canvas-preview">
+                <img src="images/hero.png" alt="Canvas Preview">
+                <div class="preview-overlay">
+                    <h2>ONE WORLD. ONE MILLION PIXELS.</h2>
+                    <button class="btn-primary show-auth">JOIN THE MOVEMENT</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer id="footer">
+            <div class="footer-logo logo">
+                <i class="fas fa-th"></i> PIXEL<span>CEYLON</span>
+            </div>
+            <div class="social-links">
+                <a href="https://web.facebook.com/PATHUMSANJAYA979/"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.linkedin.com/in/pathum-sanjaya-b86155367/"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://api.whatsapp.com/send/?phone=94725510768"><i class="fab fa-whatsapp"></i></a>
+                <a href="mailto:pathumsanjaya.info@gmail.com"><i class="fas fa-envelope"></i></a>
+            </div>
+            <p class="copyright">CREATED BY <strong>PATHUM SANJAYA</strong> © 2024</p>
+        </footer>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-overlay auth-modal-overlay">
+        <div class="welcome-container">
+            <button class="close-auth" id="close-auth">×</button>
             <div class="welcome-hero">
                 <div class="hero-image-frame">
-                    <img src="images/hero.png" alt="Pixel Art Masterpiece" class="hero-image">
+                    <img src="images/hero.png" alt="Pixel Art" class="hero-image">
                     <div class="overlay-gradient"></div>
                 </div>
             </div>
-
             <div class="welcome-content-card">
                 <div class="branding">
                     <h1 class="glitch-text" data-text="PIXELCEYLON">PIXEL<span class="highlight">CEYLON</span></h1>
                     <div class="author-tag">CREATED BY <span class="pathum">PATHUM SANJAYA</span></div>
                 </div>
-
-                <p class="description">Join the world's largest collaborative pixel canvas. Every dot matters.</p>
-
                 <div class="auth-container">
                     <div class="auth-tabs">
                         <button class="auth-tab active" data-tab="login">LOGIN</button>
@@ -68,204 +178,310 @@
                     </div>
 
                     <div class="divider"><span>OR</span></div>
-
                     <a href="/auth/google" class="google-btn">
                         <i class="fab fa-google"></i> CONTINUE WITH GOOGLE
                     </a>
-
                     <div id="auth-error" class="error-msg"></div>
-                </div>
-
-                <div class="social-connect">
-                    <a href="https://web.facebook.com/PATHUMSANJAYA979/" target="_blank" class="social-icon facebook"
-                        title="Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/pathum-sanjaya-b86155367/" target="_blank"
-                        class="social-icon linkedin" title="LinkedIn">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a href="https://api.whatsapp.com/send/?phone=94725510768&text=Hello+PATHUM&type=phone_number&app_absent=0"
-                        target="_blank" class="social-icon whatsapp" title="WhatsApp">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                    <a href="https://mail.google.com/mail/u/0/?fs=1&to=pathumsanjaya.info@gmail.com&su=I+am+looking+to+hire&body=Hello+Pathum,%0A%0A&tf=cm"
-                        target="_blank" class="social-icon email" title="Email">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                </div>
-
-                <div class="community-stats">
-                    <div class="stat"><i class="fas fa-circle live-icon"></i> <span id="welcome-online">...</span>
-                        ONLINE</div>
-                    <div class="stat"><i class="fas fa-layer-group"></i> 1M x 1M WORLD</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- UI Overlay -->
-    <div id="notification-container" class="notification-container"></div>
+    <!-- Onboarding Screen -->
+    <div id="onboarding-screen" class="modal-overlay">
+        <div class="welcome-container onboarding-card">
+            <div class="onboarding-content">
+                <h1 class="onboarding-title">CUSTOMIZE YOUR <span>ARTIST IDENTITY</span></h1>
+                <p class="onboarding-desc">This information will appear when others right-click your art.</p>
+                <div class="onboarding-form">
+                    <div class="onboarding-avatar-section">
+                        <div class="main-avatar-preview">
+                            <img id="onboarding-preview-img" src="/images/default-avatar.png">
+                            <label for="onboarding-avatar-upload" class="avatar-edit-btn"><i
+                                    class="fas fa-camera"></i></label>
+                            <input type="file" id="onboarding-avatar-upload" hidden accept="image/*">
+                        </div>
+                        <div class="onboarding-suggestions">
+                            <p>PICK AN AVATAR:</p>
+                            <div id="onboarding-avatar-list" class="avatar-options"></div>
+                        </div>
+                    </div>
+                    <div class="onboarding-fields">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user-tag"></i>
+                            <input type="text" id="onboarding-username" placeholder="USERNAME" maxlength="15">
+                        </div>
+                        <div class="input-wrapper bio-wrapper">
+                            <i class="fas fa-quote-left"></i>
+                            <textarea id="onboarding-bio" placeholder="WRITE YOUR ARTIST BIO (Max 150 chars)"
+                                maxlength="150"></textarea>
+                        </div>
+                        <button id="onboarding-finish-btn" class="launch-button">ENTER THE WORLD</button>
+                        <button id="onboarding-logout" class="onboarding-secondary-btn">SWITCH ACCOUNT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay Assets -->
+    <div id="notification-container" class="notification-container" style="z-index: 10000;"></div>
 
     <div id="app" style="display: none;">
         <div id="planet-background"></div>
         <div id="canvas-container">
             <canvas id="pixel-canvas"></canvas>
 
-            <!-- Info Group (Fixed Top Left position as requested) -->
             <div class="info-group">
-                <div class="creative-panel status-panel">
-                    <div class="panel-header">SYSTEM STATUS</div>
-                    <div class="status-content">
-                        <div class="indicator-group">
-                            <span id="pixel-status" class="status-badge ready">READY</span>
-                            <span id="next-pixel-time">0.0s</span>
+            </div>
+
+            <div class="creative-panel status-panel center-status">
+                <div class="status-content">
+                    <div class="indicator-group">
+                        <span id="pixel-status" class="status-badge ready">READY</span>
+                        <span id="next-pixel-time">0.0s</span>
+                    </div>
+                    <div class="progress-container">
+                        <div id="cooldown-bar" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="creative-panel help-panel">
+                <div class="panel-header">SHORTCUTS</div>
+                <div class="shortcut-list">
+                    <div class="shortcut"><span>[G]</span> GRID</div>
+                    <div class="shortcut"><span>[C]</span> CHAT</div>
+                    <div class="shortcut"><span>[S]</span> SAVE</div>
+                    <div class="shortcut"><span>[F]</span> FULL</div>
+                </div>
+                <div class="creator-footer">BY PATHUM SANJAYA</div>
+            </div>
+        </div>
+
+        <!-- Global View Controls -->
+        <div class="floating-controls view-controls">
+            <button id="zoom-in" title="Zoom In (+)"><i class="fas fa-plus"></i></button>
+            <button id="zoom-out" title="Zoom Out (-)"><i class="fas fa-minus"></i></button>
+            <button id="reset-view" title="Home (0)"><i class="fas fa-home"></i></button>
+            <button id="open-dm-list" title="Direct Messages"><i class="fas fa-envelope"></i></button>
+            <button id="toggle-grid" title="Grid (G)" class="active"><i class="fas fa-border-all"></i></button>
+            <button id="toggle-sound" title="Sound (S)"><i class="fas fa-volume-up"></i></button>
+            <button id="toggle-fullscreen" title="Full View (F)"><i class="fas fa-expand"></i></button>
+            <button id="export-canvas" title="Capture PNG (S)"><i class="fas fa-camera-retro"></i></button>
+            <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+
+        <!-- Profile Button (Standalone) -->
+        <div class="top-right-profile">
+            <div class="user-profile-button" id="open-profile" title="My Profile">
+                <img id="user-avatar-small" src="/images/default-avatar.png" alt="Profile">
+                <div class="status-indicator online"></div>
+            </div>
+        </div>
+
+        <!-- Pixel Tooling -->
+        <div class="floating-controls tools-controls">
+            <button class="tool-button active" id="pen-tool" data-tool="pen" title="Pen (P)"><i
+                    class="fas fa-pencil-alt"></i></button>
+            <button class="tool-button" id="rainbow-tool" data-tool="rainbow" title="Rainbow (R)"><i
+                    class="fas fa-magic"></i></button>
+            <button class="tool-button" id="eraser-tool" data-tool="eraser" title="Eraser (E)"><i
+                    class="fas fa-eraser"></i></button>
+            <button class="tool-button" id="pipette-tool" data-tool="pipette" title="Picker (I)"><i
+                    class="fas fa-eye-dropper"></i></button>
+            <button class="tool-button" id="move-tool" data-tool="move" title="Move (M)"><i
+                    class="fas fa-hand-paper"></i></button>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="floating-controls color-controls">
+            <div class="color-palette" id="color-palette"></div>
+            <div class="picker-container">
+                <input type="color" id="custom-color" value="#3b82f6" title="Custom Color">
+                <i class="fas fa-plus"></i>
+            </div>
+        </div>
+
+        <!-- Live Info -->
+        <div class="stats-group">
+            <div class="creative-panel stats-panel">
+                <div class="online-stat"><i class="fas fa-users"></i> <span id="online-count">1</span> ARTISTS</div>
+                <div class="online-stat" style="border-bottom: none; margin-bottom: 5px;">
+                    <i class="fas fa-sync-alt"></i>
+                    <span id="debug-status">0 Pixels Sync</span>
+                    <button id="force-sync-btn"
+                        style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:10px; margin-left:8px;"
+                        title="Sync Data Now">
+                        <i class="fas fa-redo-alt"></i>
+                    </button>
+                </div>
+                <div class="coord-stat"><i class="fas fa-crosshairs"></i> X: <span id="mouse-x">0</span> Y: <span
+                        id="mouse-y">0</span></div>
+            </div>
+        </div>
+
+        <!-- Mini Map -->
+        <div class="mini-map-wrapper">
+            <canvas id="mini-map"></canvas>
+            <div id="mini-map-view-box"></div>
+        </div>
+
+        <!-- Context Menu -->
+        <div id="pixel-menu" class="context-menu">
+            <div class="menu-item" id="view-artist">
+                <i class="fas fa-user-circle"></i> VIEW ARTIST
+            </div>
+            <div class="menu-item" id="copy-link">
+                <i class="fas fa-link"></i> COPY LINK
+            </div>
+            <div class="menu-item" id="share-chat">
+                <i class="fas fa-paper-plane"></i> SHARE TO CHAT
+            </div>
+        </div>
+
+        <!-- Chat -->
+        <div class="chat-container">
+            <button id="chat-toggle" class="chat-toggle">
+                <i class="fas fa-comment-dots"></i>
+                <span class="unread-count" id="unread-count"></span>
+            </button>
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <div class="header-left">
+                        <i class="fas fa-globe"></i>
+                        <select id="language-select">
+                            <option value="en">ENGLISH</option>
+                            <option value="si">SINHALA</option>
+                            <option value="es">ESPAÑOL</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                    <button id="minimize-chat"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-row">
+                    <button id="emoji-toggle"><i class="far fa-laugh-beam"></i></button>
+                    <div id="emoji-panel" class="emoji-panel"></div>
+                    <input type="text" id="chat-input" placeholder="SEND A MESSAGE...">
+                    <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Style Profile Modal -->
+    <div id="profile-modal" class="modal-overlay">
+        <div class="wa-profile-card">
+            <div class="wa-profile-header">
+                <button class="wa-back-btn close-modal"><i class="fas fa-arrow-left"></i></button>
+                <span>Profile</span>
+            </div>
+            <div class="wa-profile-body">
+                <div class="wa-avatar-container">
+                    <img id="profile-img" src="/images/default-avatar.png">
+                    <label for="avatar-upload" class="wa-avatar-edit"><i class="fas fa-camera"></i></label>
+                    <input type="file" id="avatar-upload" hidden accept="image/*">
+                </div>
+
+                <div class="wa-info-section">
+                    <div class="wa-info-item">
+                        <div class="wa-info-label">Name</div>
+                        <div class="wa-info-value">
+                            <span id="profile-username">PLAYER NAME</span>
+                            <button id="edit-username-btn"><i class="fas fa-pen"></i></button>
                         </div>
-                        <div class="progress-container">
-                            <div id="cooldown-bar" class="progress-fill"></div>
+                        <div class="wa-info-tip">This is not your password. This name will be visible to other artists.
                         </div>
                     </div>
-                </div>
 
-                <div class="creative-panel help-panel">
-                    <div class="panel-header">SHORTCUTS</div>
-                    <div class="shortcut-list">
-                        <div class="shortcut"><span>[G]</span> GRID</div>
-                        <div class="shortcut"><span>[C]</span> CHAT</div>
-                        <div class="shortcut"><span>[S]</span> SAVE</div>
-                        <div class="shortcut"><span>[F]</span> FULL</div>
-                    </div>
-                    <div class="creator-footer">BY PATHUM SANJAYA</div>
-                </div>
-            </div>
-
-            <!-- View Controls (Top Right) -->
-            <div class="floating-controls view-controls">
-                <button id="zoom-in" title="Zoom In (+)">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button id="zoom-out" title="Zoom Out (-)">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <button id="reset-view" title="Home (0)">
-                    <i class="fas fa-home"></i>
-                </button>
-                <button id="toggle-grid" title="Grid (G)" class="active">
-                    <i class="fas fa-border-all"></i>
-                </button>
-                <button id="toggle-sound" title="Sound (S)">
-                    <i class="fas fa-volume-up"></i>
-                </button>
-                <button id="toggle-fullscreen" title="Full View (F)">
-                    <i class="fas fa-expand"></i>
-                </button>
-                <button id="export-canvas" title="Capture PNG (S)">
-                    <i class="fas fa-camera-retro"></i>
-                </button>
-            </div>
-
-            <!-- Tools (Bottom Left) -->
-            <div class="floating-controls tools-controls">
-                <button class="tool-button active" id="pen-tool" data-tool="pen" title="Pen (P)">
-                    <i class="fas fa-pencil-alt"></i>
-                </button>
-                <button class="tool-button" id="rainbow-tool" data-tool="rainbow" title="Rainbow (R)">
-                    <i class="fas fa-magic"></i>
-                </button>
-                <button class="tool-button" id="eraser-tool" data-tool="eraser" title="Eraser (E)">
-                    <i class="fas fa-eraser"></i>
-                </button>
-                <button class="tool-button" id="picker-tool" data-tool="picker" title="Picker (I)">
-                    <i class="fas fa-eye-dropper"></i>
-                </button>
-                <button class="tool-button" id="move-tool" data-tool="move" title="Hand (M)">
-                    <i class="fas fa-hand-paper"></i>
-                </button>
-            </div>
-
-            <!-- Colors (Bottom Center) -->
-            <div class="floating-controls color-controls">
-                <div class="palette-wrapper">
-                    <div class="color-palette" id="color-palette"></div>
-                    <div class="picker-container">
-                        <input type="color" id="custom-color" value="#000000" title="Custom Picker">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Online / Coords (Bottom Right) -->
-            <div class="stats-group">
-                <div class="creative-panel stats-panel">
-                    <div class="online-stat">
-                        <i class="fas fa-users"></i>
-                        <span id="online-count">1</span> ONLINE
-                    </div>
-                    <div class="coord-stat" id="coord-display">
-                        X: 500000, Y: 500000
-                    </div>
-                </div>
-
-                <div id="mini-map-container" class="mini-map-wrapper">
-                    <canvas id="mini-map-canvas"></canvas>
-                    <div id="mini-map-viewport"></div>
-                </div>
-            </div>
-
-            <!-- Context Menu -->
-            <div id="context-menu" class="context-menu">
-                <div class="menu-item" id="copy-location">
-                    <i class="fas fa-link"></i> COPY LINK
-                </div>
-                <div class="menu-item" id="share-chat">
-                    <i class="fas fa-paper-plane"></i> SHARE TO CHAT
-                </div>
-            </div>
-
-            <!-- Chat Redesign -->
-            <div class="chat-container">
-                <button id="chat-toggle" class="chat-toggle">
-                    <i class="fas fa-comment-dots"></i>
-                    <span class="unread-count" id="unread-count"></span>
-                </button>
-                <div class="chat-panel">
-                    <div class="chat-header">
-                        <div class="header-left">
-                            <i class="fas fa-globe"></i>
-                            <select id="language-select">
-                                <option value="en">ENGLISH</option>
-                                <option value="si">SINHALA</option>
-                                <option value="es">ESPAÑOL</option>
-                                <option value="ja">日本語</option>
-                            </select>
+                    <div class="wa-info-item">
+                        <div class="wa-info-label">About (Bio)</div>
+                        <div class="wa-info-value">
+                            <textarea id="profile-bio" rows="1" maxlength="150" placeholder="Available"></textarea>
+                            <button id="save-bio-btn"><i class="fas fa-check"></i></button>
                         </div>
-                        <button id="minimize-chat"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="chat-messages" id="chat-messages"></div>
-                    <div class="chat-input-row">
-                        <button id="emoji-toggle"><i class="far fa-laugh-beam"></i></button>
-                        <div id="emoji-panel" class="emoji-panel"></div>
-                        <input type="text" id="chat-input" placeholder="SEND A MESSAGE...">
-                        <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+
+                    <div class="wa-stats-section">
+                        <div class="wa-stat">
+                            <i class="fas fa-palette"></i>
+                            <span id="profile-pixel-count">0</span> Pixels
+                        </div>
+                        <div class="wa-stat">
+                            <i class="fas fa-heart"></i>
+                            <span id="profile-likes-count">0</span> Likes
+                        </div>
+                        <div class="wa-stat" id="status-row">
+                            <div id="profile-status" class="status-dot online"></div>
+                            <span id="status-text">Online</span>
+                        </div>
+                    </div>
+
+                    <div class="wa-action-btns" id="visitor-actions">
+                        <button id="like-profile-btn" class="wa-btn-primary">LIKE ARTIST</button>
+                        <button id="message-user-btn" class="wa-btn-secondary">MESSAGE</button>
+                    </div>
+
+                    <div class="avatar-suggestions-wa">
+                        <div class="wa-info-label">Suggested Avatars</div>
+                        <div class="avatar-options" id="avatar-suggestions"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        window.sharedSocket = io(window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin, {
-            transports: ['websocket'],
-            reconnection: true
-        });
-        // Welcome screen online count update
-        window.sharedSocket.on('online count', (count) => {
-            const el = document.getElementById('welcome-online');
-            if (el) el.textContent = count;
-        });
-    </script>
+
+    <!-- DM Modal -->
+    <div id="dm-modal" class="modal-overlay">
+        <div class="wa-dm-card">
+            <div class="wa-dm-header">
+                <div class="wa-dm-header-content">
+                    <button class="close-modal"><i class="fas fa-arrow-left"></i></button>
+                    <img id="dm-recipient-img" src="/images/default-avatar.png">
+                    <div class="dm-header-text">
+                        <span id="dm-recipient-name">CHAT</span>
+                        <span class="dm-status">online</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <i class="fas fa-ellipsis-v"></i>
+                </div>
+            </div>
+            <div class="wa-dm-body" id="dm-messages">
+                <!-- Messages will be injected here -->
+            </div>
+            <div class="wa-dm-input-row">
+                <button id="dm-emoji-btn"><i class="far fa-smile"></i></button>
+                <div id="dm-emoji-panel" class="emoji-panel"></div>
+                <input type="text" id="dm-input" placeholder="Type a message">
+                <button id="send-dm-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DM LIST MODAL (Inbox) -->
+    <div id="dm-list-modal" class="modal-overlay">
+        <div class="wa-profile-card" style="height:500px !important;">
+            <div class="wa-profile-header">
+                <button class="wa-back-btn close-modal"><i class="fas fa-arrow-left"></i></button>
+                <span>Recent Chats</span>
+            </div>
+            <div id="dm-inbox-list" style="flex:1; overflow-y:auto; padding:10px;">
+                <!-- List of artists who messaged you -->
+                <div style="text-align:center; padding:50px; opacity:0.5;">No active conversations.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>window.sharedSocket = io();</script>
+    <script src="js/landing.js"></script>
+    <script src="js/profile.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/chat.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>

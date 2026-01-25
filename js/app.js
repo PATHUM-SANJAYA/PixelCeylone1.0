@@ -11,7 +11,7 @@ class PixelCanvas {
         this.isPanning = false;
         this.lastX = 0;
         this.lastY = 0;
-        this.selectedColor = '#000000';
+        this.selectedColor = '#3b82f6';
         this.currentTool = 'pen';
         this.pixels = new Map();
 
@@ -25,16 +25,16 @@ class PixelCanvas {
         this.socket = window.sharedSocket;
 
         // Mini-map elements
-        this.miniMap = document.getElementById('mini-map-canvas');
+        this.miniMap = document.getElementById('mini-map');
         this.miniMapCtx = this.miniMap ? this.miniMap.getContext('2d') : null;
-        this.miniMapViewport = document.getElementById('mini-map-viewport');
+        this.miniMapViewport = document.getElementById('mini-map-view-box');
 
         this.audioEnabled = true;
         this.audioContext = null;
         this.hue = 0;
 
         // Context menu elements
-        this.contextMenu = document.getElementById('context-menu');
+        this.contextMenu = document.getElementById('pixel-menu');
         this.contextPos = { x: 0, y: 0 };
 
         this.initTools();
@@ -44,32 +44,28 @@ class PixelCanvas {
 
         this.render();
 
-        // Socket events
         this.socket.on('init', (pixelData) => {
-            this.pixels = new Map(pixelData);
+            if (!pixelData) return;
+            const count = Array.isArray(pixelData) ? pixelData.length : 0;
+            console.log(`[SYNC] World State Received: ${count} pixels.`);
 
-            // AUTOMATIC ART FINDER:
-            // If the user didn't use a location link (#x,y), find where the art is.
-            if (!window.location.hash && pixelData.length > 0) {
-                // Determine bounding box of all art to find the true center of the "world"
-                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-                pixelData.forEach(entry => {
-                    const [x, y] = entry[0].split(',').map(Number);
-                    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-                    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
-                });
+            // Populate Debug HUD if exists
+            const debugEl = document.getElementById('debug-status');
+            if (debugEl) debugEl.textContent = `${count} Pixels Sync`;
 
-                // Jump to the center of the bounding box
-                const targetX = Math.round((minX + maxX) / 2);
-                const targetY = Math.round((minY + maxY) / 2);
-                this.jumpTo(targetX, targetY);
-                console.log(`Auto-centered on art at ${targetX}, ${targetY}`);
-            } else if (!window.location.hash) {
-                // If world is totally empty, start at 0,0
-                this.centerOn(0, 0);
-            }
+            const newMap = new Map();
+            pixelData.forEach((entry) => {
+                if (!entry || entry.length < 2) return;
+                const [k, v] = entry;
+                const data = typeof v === 'string' ? { color: v, author: 'System' } : v;
+                if (!data.color) return;
+                newMap.set(k, { color: data.color, author: data.author || 'System' });
+            });
+            this.pixels = newMap;
 
-            this.render();
+            // WORLD DISCOVERY: Focus on art cluster immediately upon connection
+            this.focusOnArt();
+            this.render(); // Immediate draw
             if (this.miniMap) this.drawMiniMap();
         });
 
@@ -78,7 +74,7 @@ class PixelCanvas {
             if (data.color === null) {
                 this.pixels.delete(key);
             } else {
-                this.pixels.set(key, data.color);
+                this.pixels.set(key, { color: data.color, author: data.author });
             }
             this.render();
             if (this.miniMap) this.drawMiniMap();
@@ -88,11 +84,79 @@ class PixelCanvas {
             this.setupCanvas();
             this.render();
         });
+
+        // Request initial data in case emission was missed
+        this.socket.emit('request init');
+
+        // FORCE SYNC RETRY: If 0 pixels after 2 seconds, try again automatically
+        this.initRetryCount = 0;
+        this.initRetryInterval = setInterval(() => {
+            if (this.pixels.size === 0 && this.initRetryCount < 10) {
+                console.log(`[RETRY] No pixel data yet, retrying sync... (${this.initRetryCount + 1}/10)`);
+                this.socket.emit('request init');
+                this.initRetryCount++;
+            } else if (this.pixels.size > 0) {
+                clearInterval(this.initRetryInterval);
+            }
+        }, 2000);
+
+        // Manual Force Sync Button Handler
+        const syncBtn = document.getElementById('force-sync-btn');
+        if (syncBtn) {
+            syncBtn.onclick = () => {
+                syncBtn.classList.add('fa-spin');
+                this.socket.emit('request init');
+                setTimeout(() => syncBtn.classList.remove('fa-spin'), 1500);
+            };
+        }
+
+        // Continuous Render Loop for stability
+        const loop = () => {
+            this.render();
+            requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+    }
+
+    focusOnArt() {
+        if (window.location.hash) return; // Don't override shared links
+
+        if (this.pixels.size === 0) {
+            this.centerOn(500000, 500000); // Center of 1M world
+            this.zoom = 1;
+            return;
+        }
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        let foundAny = false;
+        for (const key of this.pixels.keys()) {
+            const parts = key.split(',');
+            const x = Number(parts[0]), y = Number(parts[1]);
+            if (isNaN(x) || isNaN(y)) continue;
+            minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+            foundAny = true;
+        }
+
+        if (foundAny) {
+            const targetX = Math.round((minX + maxX) / 2);
+            const targetY = Math.round((minY + maxY) / 2);
+            console.log(`[RADAR] Focusing on Art at: ${targetX}, ${targetY}`);
+            this.jumpTo(targetX, targetY);
+        } else {
+            this.centerOn(500000, 500000);
+            this.zoom = 1;
+        }
+    }
+
+    refresh() {
+        this.setupCanvas();
+        this.render();
     }
 
     centerOn(gridX, gridY) {
-        this.offset.x = (this.canvas.width / 2) - (gridX * this.pixelSize * this.zoom);
-        this.offset.y = (this.canvas.height / 2) - (gridY * this.pixelSize * this.zoom);
+        this.offset.x = (window.innerWidth / 2) - (gridX * this.pixelSize * this.zoom);
+        this.offset.y = (window.innerHeight / 2) - (gridY * this.pixelSize * this.zoom);
     }
 
     initTools() {
@@ -156,8 +220,11 @@ class PixelCanvas {
     }
 
     setupCanvas() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = window.innerWidth * dpr;
+        this.canvas.height = window.innerHeight * dpr;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        this.ctx.scale(dpr, dpr);
     }
 
     setupEventListeners() {
@@ -170,7 +237,7 @@ class PixelCanvas {
                 case 'p': this.setTool('pen'); break;
                 case 'r': this.setTool('rainbow'); break;
                 case 'e': this.setTool('eraser'); break;
-                case 'i': this.setTool('picker'); break;
+                case 'i': this.setTool('pipette'); break;
                 case 'm': this.setTool('move'); break;
                 case 'g': this.toggleGrid(); break;
                 case 'f': this.toggleFullScreen(); break;
@@ -188,9 +255,10 @@ class PixelCanvas {
 
         const handleInteraction = (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-            return this.screenToGrid(x, y);
+            // Mouse coords relative to the CSS size of the canvas
+            const mouseX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const mouseY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+            return this.screenToGrid(mouseX, mouseY);
         };
 
         this.canvas.addEventListener('mousedown', (e) => {
@@ -200,12 +268,19 @@ class PixelCanvas {
 
                 if (this.currentTool === 'move') {
                     this.isPanning = true;
-                } else if (this.currentTool === 'picker') {
+                } else if (this.currentTool === 'pipette') {
                     const key = `${pos.x},${pos.y}`;
-                    if (this.pixels.has(key)) this.setColor(this.pixels.get(key));
+                    if (this.pixels.has(key)) {
+                        const val = this.pixels.get(key);
+                        const color = typeof val === 'string' ? val : val.color;
+                        this.setColor(color);
+                    }
                 } else {
                     this.isDragging = true;
                     this.placePixel(pos.x, pos.y);
+
+                    // Hide context menu on click
+                    this.contextMenu.style.display = 'none';
                 }
             } else if (e.button === 2) {
                 this.isPanning = true;
@@ -228,8 +303,12 @@ class PixelCanvas {
 
             const rect = this.canvas.getBoundingClientRect();
             const pos = this.screenToGrid(e.clientX - rect.left, e.clientY - rect.top);
-            const coordEl = document.getElementById('coord-display');
-            if (pos && coordEl) coordEl.textContent = `X: ${pos.x}, Y: ${pos.y}`;
+            if (pos) {
+                const mouseX = document.getElementById('mouse-x');
+                const mouseY = document.getElementById('mouse-y');
+                if (mouseX) mouseX.textContent = pos.x;
+                if (mouseY) mouseY.textContent = pos.y;
+            }
         });
 
         window.addEventListener('mouseup', () => {
@@ -282,8 +361,7 @@ class PixelCanvas {
         document.getElementById('zoom-in').onclick = () => this.zoomAt(innerWidth / 2, innerHeight / 2, 1.25);
         document.getElementById('zoom-out').onclick = () => this.zoomAt(innerWidth / 2, innerHeight / 2, 0.8);
         document.getElementById('reset-view').onclick = () => {
-            this.zoom = 1;
-            this.centerOn(500000, 500000);
+            this.focusOnArt();
             this.render();
         };
         document.getElementById('toggle-grid').onclick = (e) => {
@@ -300,12 +378,15 @@ class PixelCanvas {
         };
 
         // Mini-map
-        document.getElementById('mini-map-container').onmousedown = (e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * this.canvasWidth;
-            const y = ((e.clientY - rect.top) / rect.height) * this.canvasHeight;
-            this.jumpTo(x, y);
-        };
+        const miniMapEl = document.getElementById('mini-map') || document.querySelector('.mini-map-wrapper');
+        if (miniMapEl) {
+            miniMapEl.onmousedown = (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * this.canvasWidth;
+                const y = ((e.clientY - rect.top) / rect.height) * this.canvasHeight;
+                this.jumpTo(x, y);
+            };
+        }
 
         // Context Menu
         this.canvas.oncontextmenu = (e) => {
@@ -324,10 +405,28 @@ class PixelCanvas {
             if (this.contextMenu && !this.contextMenu.contains(e.target)) this.contextMenu.style.display = 'none';
         };
 
-        document.getElementById('copy-location').onclick = () => {
-            const url = `${location.origin}${location.pathname}#x=${this.contextPos.x},y=${this.contextPos.y}`;
-            navigator.clipboard.writeText(url).then(() => alert('Location link copied!'));
+        document.getElementById('view-artist').onclick = () => {
+            const key = `${this.contextPos.x},${this.contextPos.y}`;
+            const pixel = this.pixels.get(key);
+
+            if (!pixel) {
+                alert('No pixel at this location.');
+            } else if (!pixel.author || pixel.author === 'Guest' || pixel.author === 'System' || pixel.author === 'You') {
+                const name = (pixel.author === 'You' || !pixel.author) ? 'YOU (GUEST)' : pixel.author.toUpperCase();
+                alert(`Artist: ${name}\nOnly registered users have profiles.`);
+            } else {
+                if (window.profileManager) window.profileManager.showProfile(pixel.author);
+            }
+            this.contextMenu.style.display = 'none';
         };
+
+        const copyBtn = document.getElementById('copy-link') || document.getElementById('copy-location');
+        if (copyBtn) {
+            copyBtn.onclick = () => {
+                const url = `${location.origin}${location.pathname}#x=${this.contextPos.x},y=${this.contextPos.y}`;
+                navigator.clipboard.writeText(url).then(() => alert('Location link copied!'));
+            };
+        }
 
         document.getElementById('share-chat').onclick = () => {
             if (window.chat) {
@@ -374,7 +473,15 @@ class PixelCanvas {
         const lastTime = this.lastPixelTimeByTool[tool] || 0;
         const now = Date.now();
 
-        if (now - lastTime < cooldown) return;
+        if (now - lastTime < cooldown) {
+            const timeLeft = ((cooldown - (now - lastTime)) / 1000).toFixed(1);
+            const nowTime = Date.now();
+            if (window.chat && (!this.lastCooldownNotify || nowTime - this.lastCooldownNotify > 500)) {
+                window.chat.showNotification(`Wait ${timeLeft}s`, 'cooldown');
+                this.lastCooldownNotify = nowTime;
+            }
+            return;
+        }
 
         const key = `${x},${y}`;
         let color = this.selectedColor;
@@ -383,15 +490,15 @@ class PixelCanvas {
             color = null;
             this.pixels.delete(key);
             this.playSound(200, 'sawtooth');
-            this.socket.emit('pixel', { x, y, color: null });
+            this.socket.emit('pixel', { x, y, color: null, username: window.chat ? window.chat.username : null });
         } else {
             if (tool === 'rainbow') {
                 this.hue = (this.hue + 20) % 360;
                 color = `hsl(${this.hue}, 100%, 50%)`;
             }
-            this.pixels.set(key, color);
+            this.pixels.set(key, { color, author: window.chat ? window.chat.username : 'You' });
             this.playSound(400 + Math.random() * 200, 'sine');
-            this.socket.emit('pixel', { x, y, color });
+            this.socket.emit('pixel', { x, y, color, username: window.chat ? window.chat.username : null });
         }
 
         this.lastPixelTimeByTool[tool] = now;
@@ -401,6 +508,16 @@ class PixelCanvas {
 
     updateTimerUI() {
         const tool = this.currentTool;
+        // List tools that use the cooldown timer
+        const timerTools = ['pen', 'eraser', 'rainbow'];
+        const panel = document.querySelector('.status-panel.center-status');
+
+        // If not a timed tool, hide panel immediately if visible
+        if (!timerTools.includes(tool)) {
+            if (panel) panel.classList.remove('visible');
+            return;
+        }
+
         let cooldown = 1500;
         if (tool === 'eraser') cooldown = 3000;
         if (tool === 'rainbow') cooldown = 1000;
@@ -414,24 +531,45 @@ class PixelCanvas {
         const bar = document.getElementById('cooldown-bar');
 
         if (remaining > 0) {
+            // WE ARE IN COOLDOWN
+            if (panel) panel.classList.add('visible');
             if (status) {
-                status.textContent = 'Wait';
-                status.className = 'time-value wait';
+                status.textContent = 'WAIT';
+                status.className = 'status-badge wait';
             }
             if (timer) timer.textContent = (remaining / 1000).toFixed(1) + 's';
-            if (bar) bar.style.setProperty('--progress', (100 - (remaining / cooldown * 100)) + '%');
-        } else {
-            if (status) {
-                status.textContent = 'Ready';
-                status.className = 'time-value ready';
+            if (bar) bar.style.width = (100 - (remaining / cooldown * 100)) + '%';
+
+            // Clear any pending auto-hide
+            if (this.timerHideTimeout) {
+                clearTimeout(this.timerHideTimeout);
+                this.timerHideTimeout = null;
             }
-            if (timer) timer.textContent = '0.0s';
-            if (bar) bar.style.setProperty('--progress', '100%');
+        } else {
+            // READY STATE
+            if (status) {
+                status.textContent = 'READY';
+                status.className = 'status-badge ready';
+            }
+            if (timer) timer.textContent = 'READY'; // Changed from '0.0s' to 'READY' for better UX
+            if (bar) bar.style.width = '100%';
+
+            // Auto-hide after 2 seconds of being ready
+            if (panel && panel.classList.contains('visible') && !this.timerHideTimeout) {
+                this.timerHideTimeout = setTimeout(() => {
+                    // Check if still ready before hiding
+                    const stillReady = (Date.now() - (this.lastPixelTimeByTool[this.currentTool] || 0)) >= cooldown;
+                    if (stillReady) {
+                        panel.classList.remove('visible');
+                    }
+                    this.timerHideTimeout = null;
+                }, 2000);
+            }
         }
     }
 
     render() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
         const scale = this.pixelSize * this.zoom;
 
@@ -442,34 +580,41 @@ class PixelCanvas {
 
             const startX = Math.floor(-this.offset.x / scale);
             const startY = Math.floor(-this.offset.y / scale);
-            const endX = startX + Math.ceil(this.canvas.width / scale);
-            const endY = startY + Math.ceil(this.canvas.height / scale);
+            // Use CSS logical dimensions for culling
+            const endX = startX + Math.ceil(window.innerWidth / scale);
+            const endY = startY + Math.ceil(window.innerHeight / scale);
 
             this.ctx.beginPath();
             for (let x = Math.max(0, startX); x <= Math.min(this.canvasWidth, endX); x++) {
-                const sx = x * scale + this.offset.x;
+                const sx = Math.floor(x * scale + this.offset.x);
                 this.ctx.moveTo(sx, 0);
-                this.ctx.lineTo(sx, this.canvas.height);
+                this.ctx.lineTo(sx, window.innerHeight);
             }
             for (let y = Math.max(0, startY); y <= Math.min(this.canvasHeight, endY); y++) {
-                const sy = y * scale + this.offset.y;
+                const sy = Math.floor(y * scale + this.offset.y);
                 this.ctx.moveTo(0, sy);
-                this.ctx.lineTo(this.canvas.width, sy);
+                this.ctx.lineTo(window.innerWidth, sy);
             }
             this.ctx.stroke();
         }
 
-        // Pixels with Culling
-        const ps = Math.ceil(scale);
-        for (const [key, color] of this.pixels.entries()) {
-            const [x, y] = key.split(',').map(Number);
-            const sx = x * scale + this.offset.x;
-            const sy = y * scale + this.offset.y;
+        // Pixels with Culling & Absolute Snapping
+        const ps = Math.ceil(this.pixelSize * this.zoom);
+        const lw = window.innerWidth;
+        const lh = window.innerHeight;
 
-            if (sx + ps < 0 || sx > this.canvas.width || sy + ps < 0 || sy > this.canvas.height) continue;
+        for (const [key, data] of this.pixels.entries()) {
+            const parts = key.split(',');
+            const x = Number(parts[0]), y = Number(parts[1]);
 
-            this.ctx.fillStyle = color;
-            this.ctx.fillRect(Math.floor(sx), Math.floor(sy), ps, ps);
+            const sx = Math.floor(x * scale + this.offset.x);
+            const sy = Math.floor(y * scale + this.offset.y);
+
+            // Strict Culling Check
+            if (sx + ps < -50 || sx > lw + 50 || sy + ps < -50 || sy > lh + 50) continue;
+
+            this.ctx.fillStyle = data.color;
+            this.ctx.fillRect(sx, sy, ps, ps);
         }
 
         this.updateMiniMapViewport();
@@ -483,24 +628,25 @@ class PixelCanvas {
         this.miniMapCtx.fillRect(0, 0, 1500, 1500);
 
         const scale = 1500 / this.canvasWidth;
-        for (const [key, color] of this.pixels.entries()) {
+        for (const [key, data] of this.pixels.entries()) {
             const [x, y] = key.split(',').map(Number);
-            this.miniMapCtx.fillStyle = color;
+            this.miniMapCtx.fillStyle = typeof data === 'string' ? data : data.color;
             this.miniMapCtx.fillRect(x * scale, y * scale, Math.max(1, scale), Math.max(1, scale));
         }
     }
 
     updateMiniMapViewport() {
         if (!this.miniMapViewport) return;
-        const container = document.getElementById('mini-map-container');
+        const container = document.querySelector('.mini-map-wrapper');
+        if (!container) return;
         const cw = container.offsetWidth;
         const ch = container.offsetHeight;
         const scale = this.pixelSize * this.zoom;
 
         const vx = (-this.offset.x / scale) / this.canvasWidth * cw;
         const vy = (-this.offset.y / scale) / this.canvasHeight * ch;
-        const vw = (this.canvas.width / scale) / this.canvasWidth * cw;
-        const vh = (this.canvas.height / scale) / this.canvasHeight * ch;
+        const vw = (window.innerWidth / scale) / this.canvasWidth * cw;
+        const vh = (window.innerHeight / scale) / this.canvasHeight * ch;
 
         this.miniMapViewport.style.left = Math.max(0, vx) + 'px';
         this.miniMapViewport.style.top = Math.max(0, vy) + 'px';
@@ -510,8 +656,8 @@ class PixelCanvas {
 
     jumpTo(x, y) {
         this.zoom = 5;
-        this.offset.x = (this.canvas.width / 2) - (x * this.pixelSize * this.zoom);
-        this.offset.y = (this.canvas.height / 2) - (y * this.pixelSize * this.zoom);
+        this.offset.x = (window.innerWidth / 2) - (x * this.pixelSize * this.zoom);
+        this.offset.y = (window.innerHeight / 2) - (y * this.pixelSize * this.zoom);
         this.render();
     }
 
